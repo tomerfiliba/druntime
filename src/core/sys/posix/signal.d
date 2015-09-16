@@ -105,14 +105,19 @@ union sigval
     void*   sival_ptr;
 }
 
+immutable int SIGRTMIN;
+immutable int SIGRTMAX;
+
 version( Solaris )
 {
     import core.sys.posix.unistd;
     private int _sigrtmin() { return cast(int) sysconf(_SC_SIGRT_MIN); }
     private int _sigrtmax() { return cast(int) sysconf(_SC_SIGRT_MAX); }
 
-    alias _sigrtmin SIGRTMIN;
-    alias _sigrtmax SIGRTMAX;
+    shared static this() {
+        SIGRTMIN = _sigrtmin();
+        SIGRTMAX = _sigrtmax();
+    }
 }
 else version( Posix )
 {
@@ -122,8 +127,10 @@ else version( Posix )
         int __libc_current_sigrtmax();
     }
 
-    alias __libc_current_sigrtmin SIGRTMIN;
-    alias __libc_current_sigrtmax SIGRTMAX;
+    shared static this() {
+        SIGRTMIN = __libc_current_sigrtmin();
+        SIGRTMAX = __libc_current_sigrtmax();
+    }
 }
 
 version( linux )
